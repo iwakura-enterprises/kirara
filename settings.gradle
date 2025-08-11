@@ -1,0 +1,5 @@
+rootProject.name = 'kirara'
+
+include 'kirara-core'
+include 'kirara-httpclient'
+include 'kirara-gson'
