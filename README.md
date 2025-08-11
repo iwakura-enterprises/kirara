@@ -1,5 +1,5 @@
 <div align="center">
-<img width="400" src="kirara-logo.png" />
+  <a href="https://docs.iwakura.enterprises/kirara.html"><img width="400" src="kirara-logo.png" /></a>
 </div>
 
 # Kirara
