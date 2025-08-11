@@ -1,4 +1,6 @@
-<img align="right" width="400" src="kirara-logo.png" />
+<div align="center">
+<img width="400" src="kirara-logo.png" />
+</div>
 
 # Kirara
 
