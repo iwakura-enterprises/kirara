@@ -7,7 +7,7 @@
 Powerful yet simple RESTful API wrapper library for Java. Worry not about wrapping any RESTful API
 with boilerplate code, with guidance Kirara will do it for you.
 
-> Disclaimer: The library name is not related to any character in any game or media.
+> Disclaimer: The library name and design is not related to any character in any game or media.
 
 ## Project structure
 - `kirara-core`: The core library that provides the RESTful API wrapping functionality.
