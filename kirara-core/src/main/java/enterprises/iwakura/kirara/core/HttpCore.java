@@ -14,7 +14,17 @@ import java.util.concurrent.Executors;
  */
 public abstract class HttpCore implements Closeable {
 
+    /**
+     * The executor to schedule API requests on.
+     */
     protected Executor executor = Executors.newCachedThreadPool();
+
+    /**
+     * Default constructor for HttpCore. This can be overridden by subclasses if needed.
+     */
+    public HttpCore() {
+        // Default constructor, can be overridden by subclasses if needed
+    }
 
     /**
      * Sends an API request and returns a CompletableFuture that will be completed with the response.

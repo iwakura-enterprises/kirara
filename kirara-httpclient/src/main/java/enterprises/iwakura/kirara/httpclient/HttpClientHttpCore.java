@@ -20,6 +20,9 @@ import java.util.concurrent.CompletableFuture;
 @Setter
 public class HttpClientHttpCore extends HttpCore {
 
+    /**
+     * The HttpClient instance used to send requests.
+     */
     protected HttpClient httpClient;
 
     /**

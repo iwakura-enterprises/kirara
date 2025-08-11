@@ -12,5 +12,14 @@ import lombok.Setter;
 @Setter
 public abstract class KiraraResponse implements SupportsKiraraResponse {
 
+    /**
+     * The Kirara instance associated with this response.
+     */
     protected Kirara kirara;
+
+    /**
+     * Constructor
+     */
+    public KiraraResponse() {
+    }
 }

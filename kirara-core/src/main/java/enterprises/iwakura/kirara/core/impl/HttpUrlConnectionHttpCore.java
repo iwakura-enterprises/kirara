@@ -1,6 +1,9 @@
 package enterprises.iwakura.kirara.core.impl;
 
-import enterprises.iwakura.kirara.core.*;
+import enterprises.iwakura.kirara.core.ApiRequest;
+import enterprises.iwakura.kirara.core.HttpCore;
+import enterprises.iwakura.kirara.core.Kirara;
+import enterprises.iwakura.kirara.core.RequestHeader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,8 +15,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Implementation of {@link HttpCore} using Java's built-in {@link HttpURLConnection}.
+ */
 public class HttpUrlConnectionHttpCore extends HttpCore {
 
+    /**
+     * Constructs a new HttpUrlConnectionHttpCore instance.
+     */
+    public HttpUrlConnectionHttpCore() {
+        // Default constructor
+    }
+
+    /**
+     * Returns the number of bytes to read at once from the input stream.
+     *
+     * @return The number of bytes to read at once.
+     */
     protected int getNumberOfBytesToReadAtOnce() {
         return 1024;
     }
@@ -30,13 +48,13 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
 
         getExecutor().execute(() -> {
             try {
+                kirara.onRequest(request);
                 HttpURLConnection connection = createConnection(url, method, headers);
 
                 if (body != null) {
                     writeBody(kirara, connection, body);
                 }
 
-                kirara.onRequest(request);
                 connection.connect();
 
                 T response = readResponse(kirara, connection, responseClass);
@@ -57,6 +75,17 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
         // Nothing to close
     }
 
+    /**
+     * Creates a new {@link HttpURLConnection} for the given URL and method, applying the specified headers.
+     *
+     * @param url     the URL to connect to
+     * @param method  the HTTP method to use (e.g., "GET", "POST", etc.)
+     * @param headers the list of request headers to apply to the connection
+     *
+     * @return a new {@link HttpURLConnection} instance configured with the specified URL, method, and headers
+     *
+     * @throws IOException if an I/O error occurs while opening the connection
+     */
     protected HttpURLConnection createConnection(String url, String method, List<RequestHeader> headers) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         connection.setRequestMethod(method);
@@ -72,6 +101,15 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
         return connection;
     }
 
+    /**
+     * Writes the body of the request to the connection's output stream.
+     *
+     * @param kirara      the Kirara instance used for serialization
+     * @param connection  the HttpURLConnection to write the body to
+     * @param body        the body of the request, which can be of various types (e.g., byte[], String, or any object)
+     *
+     * @throws IOException if an I/O error occurs while writing to the output stream
+     */
     protected void writeBody(Kirara kirara, HttpURLConnection connection, Object body) throws IOException {
         connection.setDoOutput(true);
         try (OutputStream outputStream = connection.getOutputStream()) {
@@ -79,6 +117,16 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
         }
     }
 
+    /**
+     * Reads the response from the connection and converts it to the specified response class.
+     *
+     * @param kirara          the Kirara instance used for deserialization
+     * @param connection      the HttpURLConnection to read the response from
+     * @param responseClass   the class of the expected response type
+     * @param <T>             the type of the response expected from the API
+     *
+     * @return an instance of the specified response class containing the response data
+     */
     protected <T> T readResponse(Kirara kirara, HttpURLConnection connection, Class<T> responseClass) {
         try {
             try (InputStream inputStream = connection.getInputStream()) {

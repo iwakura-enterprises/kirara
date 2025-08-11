@@ -16,16 +16,52 @@ import java.util.List;
  */
 @Getter
 @Setter
-@RequiredArgsConstructor
 public abstract class Kirara implements Closeable {
 
-    // Required fields for the Kirara class
+    /**
+     * The HTTP core used to send requests and receive responses.
+     */
     protected final HttpCore httpCore;
+
+    /**
+     * The serializer used to convert objects to and from JSON or other formats.
+     */
     protected final Serializer serializer;
 
-    // Optional fields for easier API interaction
+    /**
+     * The base URL of the API to which requests will be sent.
+     * All API request's endpoints will be appended to this URL.
+     */
     protected String apiUrl;
+
+    /**
+     * Default request headers that will be included in every API request.
+     * This can be used to set common headers like "User-Agent", "Accept", etc
+     */
     protected List<RequestHeader> defaultRequestHeaders;
+
+    /**
+     * Constructs a new Kirara instance with the specified HTTP core and serializer.
+     *
+     * @param httpCore   the HTTP core used to send requests
+     * @param serializer the serializer used for request and response bodies
+     */
+    public Kirara(HttpCore httpCore, Serializer serializer) {
+        this.httpCore = httpCore;
+        this.serializer = serializer;
+    }
+
+    /**
+     * Constructs a new Kirara instance with the specified HTTP core, serializer, and API URL.
+     *
+     * @param httpCore   the HTTP core used to send requests
+     * @param serializer the serializer used for request and response bodies
+     * @param apiUrl     the base URL of the API to which requests will be sent
+     */
+    public Kirara(HttpCore httpCore, Serializer serializer, String apiUrl) {
+        this(httpCore, serializer);
+        this.apiUrl = apiUrl;
+    }
 
     /**
      * Constructs a {@link ApiRequest} class with the specified method, endpoint, and response class.
@@ -78,9 +114,9 @@ public abstract class Kirara implements Closeable {
     /**
      * Invoked when an exception occurs during the request processing or response handling.
      *
-     * @param request    the API request that was being processed
-     * @param exception  the exception that occurred
-     * @param <T>        the type of the response expected from the API
+     * @param request   the API request that was being processed
+     * @param exception the exception that occurred
+     * @param <T>       the type of the response expected from the API
      */
     public <T> void onException(ApiRequest<T> request, Throwable exception) {
         // Default implementation does nothing
