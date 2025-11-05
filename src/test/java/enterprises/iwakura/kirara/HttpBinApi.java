@@ -1,5 +1,7 @@
 package enterprises.iwakura.kirara;
 
+import java.util.List;
+
 import com.google.gson.Gson;
 import enterprises.iwakura.kirara.core.ApiRequest;
 import enterprises.iwakura.kirara.core.Kirara;
@@ -9,7 +11,7 @@ import enterprises.iwakura.kirara.httpclient.HttpClientHttpCore;
 public class HttpBinApi extends Kirara {
 
     public HttpBinApi() {
-        super(new HttpClientHttpCore(), new GsonSerializer(new Gson()));
+        super(new HttpClientHttpCore(), new GsonSerializer(new Gson(), List.of("application/json", "text/html")));
     }
 
     @Override

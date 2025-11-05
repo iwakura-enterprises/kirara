@@ -1,16 +1,17 @@
 package enterprises.iwakura.kirara.core;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
-
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Represents an API request in Kirara.
@@ -81,6 +82,13 @@ public class ApiRequest<T> {
     protected Object body;
 
     /**
+     * An optional serializer override for this specific request.
+     * If set, this serializer will be used instead of the default Kirara serializer
+     * for serializing the request body and deserializing the response.
+     */
+    protected Serializer serializerOverride;
+
+    /**
      * Constructs an ApiRequest with the specified parameters.
      *
      * @param kirara        the Kirara instance associated with this request
@@ -111,6 +119,21 @@ public class ApiRequest<T> {
     }
 
     /**
+     * Sets a serializer override for this API request.
+     * If set, this serializer will be used instead of the default Kirara serializer
+     * for serializing the request body and deserializing the response.
+     *
+     * @param serializer the serializer to use for this request.
+     * @param <R>        the type of the request, extending ApiRequest
+     *
+     * @return a reference to this ApiRequest, allowing for method chaining.
+     */
+    public <R extends ApiRequest<T>> R withSerializerOverride(Serializer serializer) {
+        this.serializerOverride = serializer;
+        return (R) this;
+    }
+
+    /**
      * Sets headers for this API requests, discarding any previously set headers.
      *
      * @param headers the list of headers to set for this request. If null, no headers will be set.
@@ -126,7 +149,8 @@ public class ApiRequest<T> {
     /**
      * Sets path parameters for this API request, discarding any previously set path parameters.
      *
-     * @param pathParameters the set of path parameters to set for this request. If null, no path parameters will be set.
+     * @param pathParameters the set of path parameters to set for this request. If null, no path parameters will be
+     *                       set.
      * @param <R>            the type of the request, extending ApiRequest
      *
      * @return a reference to this ApiRequest, allowing for method chaining.
@@ -139,7 +163,8 @@ public class ApiRequest<T> {
     /**
      * Sets request queries for this API request, discarding any previously set request queries.
      *
-     * @param requestQueries the set of request queries to set for this request. If null, no request queries will be set.
+     * @param requestQueries the set of request queries to set for this request. If null, no request queries will be
+     *                       set.
      * @param <R>            the type of the request, extending ApiRequest
      *
      * @return a reference to this ApiRequest, allowing for method chaining.
@@ -204,6 +229,61 @@ public class ApiRequest<T> {
     }
 
     /**
+     * Adds request headers to this API request.
+     * If headers were previously set, this method appends the new headers to the existing list
+     * or creates a new list if none exists.
+     *
+     * @param headers the request headers to add to this API request.
+     * @param <R>     the type of the request, extending ApiRequest
+     *
+     * @return a reference to this ApiRequest, allowing for method chaining.
+     */
+    public <R extends ApiRequest<T>> R withHeaders(RequestHeader... headers) {
+        if (this.headers == null) {
+            this.headers = new ArrayList<>();
+        }
+        this.headers.addAll(Arrays.asList(headers));
+        return (R) this;
+    }
+
+    /**
+     * Adds path parameters to this API request.
+     * If path parameters were previously set, this method appends the new parameters to the existing set
+     * or creates a new set if none exists.
+     *
+     * @param pathParameters the path parameters to add to this API request.
+     * @param <R>            the type of the request, extending ApiRequest
+     *
+     * @return a reference to this ApiRequest, allowing for method chaining.
+     */
+    public <R extends ApiRequest<T>> R withPathParameters(PathParameter... pathParameters) {
+        if (this.pathParameters == null) {
+            this.pathParameters = new HashSet<>();
+        }
+        this.pathParameters.addAll(Arrays.asList(pathParameters));
+        return (R) this;
+    }
+
+    /**
+     * Adds request queries to this API request.
+     * If request queries were previously set, this method appends the new queries to the existing set
+     * or creates a new set if none exists.
+     *
+     * @param requestQueries the request queries to add to this API request.
+     * @param <R>            the type of the request, extending ApiRequest
+     *
+     * @return a reference to this ApiRequest, allowing for method chaining.
+     */
+    public <R extends ApiRequest<T>> R withRequestQueries(RequestQuery... requestQueries) {
+        if (this.requestQueries == null) {
+            this.requestQueries = new HashSet<>();
+        }
+        this.requestQueries.addAll(Arrays.asList(requestQueries));
+        return (R) this;
+    }
+
+
+    /**
      * Sets the body of this API request.
      * This method can be used to set the body for requests that require a payload, such as POST or PUT requests.
      *
@@ -222,25 +302,23 @@ public class ApiRequest<T> {
      *
      * @return the constructed request URL as a String.
      */
-    // This method can throw UnsupportedEncodingException if the encoding is not supported,
-    // but we don't really need to handle that... UTF-8 should be always supported.
-    @SneakyThrows
     public String computeRequestUrl() {
         String constructedEndpoint = endpoint;
 
         if (pathParameters != null && !pathParameters.isEmpty()) {
             for (PathParameter pathParameter : pathParameters) {
-                constructedEndpoint = constructedEndpoint.replace(String.format("{%s}", pathParameter.getKey()), pathParameter.getValue());
+                constructedEndpoint = constructedEndpoint.replace(String.format("{%s}", pathParameter.getKey()),
+                    pathParameter.getValue());
             }
         }
 
         if (requestQueries != null && !requestQueries.isEmpty()) {
             StringBuilder queryString = new StringBuilder("?");
             for (RequestQuery requestQuery : requestQueries) {
-                queryString.append(URLEncoder.encode(requestQuery.getKey(), StandardCharsets.UTF_8.toString()))
-                        .append("=")
-                        .append(URLEncoder.encode(requestQuery.getValue(), StandardCharsets.UTF_8.toString()))
-                        .append("&");
+                queryString.append(encodeValue(requestQuery.getKey()))
+                    .append("=")
+                    .append(encodeValue(requestQuery.getValue()))
+                    .append("&");
             }
             // Remove the last '&'
             queryString.setLength(queryString.length() - 1);
@@ -256,11 +334,26 @@ public class ApiRequest<T> {
             if (kirara.getApiUrl() == null) {
                 throw new IllegalStateException("No API URL set in Kirara or in API Request.");
             } else {
-                constructedUrl = kirara.getApiUrl() + URLEncoder.encode(constructedEndpoint, StandardCharsets.UTF_8.toString());
+                constructedUrl = kirara.getApiUrl() + encodeValue(constructedEndpoint);
             }
         }
 
         return constructedUrl;
+    }
+
+    /**
+     * Encodes a value using UTF-8 encoding for use in URLs.
+     *
+     * @param value the value to encode
+     *
+     * @return the encoded value as a String
+     */
+    protected String encodeValue(String value) {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("UTF-8 is not supported!", e);
+        }
     }
 
     /**

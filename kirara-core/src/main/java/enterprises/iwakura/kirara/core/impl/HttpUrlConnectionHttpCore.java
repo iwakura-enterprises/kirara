@@ -52,12 +52,12 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
                 HttpURLConnection connection = createConnection(url, method, headers);
 
                 if (body != null) {
-                    writeBody(kirara, connection, body);
+                    writeBody(kirara, request, connection, body);
                 }
 
                 connection.connect();
 
-                T response = readResponse(kirara, connection, responseClass);
+                T response = readResponse(kirara, request, connection, responseClass);
                 kirara.onResponse(request, response);
 
                 future.complete(handleKiraraSupportedResponse(kirara, response));
@@ -105,15 +105,16 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
      * Writes the body of the request to the connection's output stream.
      *
      * @param kirara      the Kirara instance used for serialization
+     * @param apiRequest  the ApiRequest associated with the body
      * @param connection  the HttpURLConnection to write the body to
      * @param body        the body of the request, which can be of various types (e.g., byte[], String, or any object)
      *
      * @throws IOException if an I/O error occurs while writing to the output stream
      */
-    protected void writeBody(Kirara kirara, HttpURLConnection connection, Object body) throws IOException {
+    protected void writeBody(Kirara kirara, ApiRequest<?> apiRequest, HttpURLConnection connection, Object body) throws IOException {
         connection.setDoOutput(true);
         try (OutputStream outputStream = connection.getOutputStream()) {
-            outputStream.write(convertBodyToBytes(kirara, body));
+            outputStream.write(convertBodyToBytes(kirara, apiRequest, body));
         }
     }
 
@@ -121,13 +122,14 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
      * Reads the response from the connection and converts it to the specified response class.
      *
      * @param kirara          the Kirara instance used for deserialization
+     * @param apiRequest      the ApiRequest associated with the response
      * @param connection      the HttpURLConnection to read the response from
      * @param responseClass   the class of the expected response type
      * @param <T>             the type of the response expected from the API
      *
      * @return an instance of the specified response class containing the response data
      */
-    protected <T> T readResponse(Kirara kirara, HttpURLConnection connection, Class<T> responseClass) {
+    protected <T> T readResponse(Kirara kirara, ApiRequest<?> apiRequest, HttpURLConnection connection, Class<T> responseClass) {
         try {
             try (InputStream inputStream = connection.getInputStream()) {
                 final Map<String, List<String>> responseHeaders = connection.getHeaderFields();
@@ -141,7 +143,7 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
                     buffer.flush();
                     responseBytes = buffer.toByteArray();
                 }
-                return convertBytesToResponse(kirara, responseBytes, responseClass, responseHeaders);
+                return convertBytesToResponse(kirara, apiRequest, responseBytes, responseClass, responseHeaders);
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to read response", e);
