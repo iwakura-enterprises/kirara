@@ -65,7 +65,7 @@ public abstract class Kirara implements Closeable {
 
     /**
      * A helper method. Constructs a {@link ApiRequest} class with the specified method, endpoint, and response class.
-     * This method is used to create a request that can be sent to the API. Uses {@link #getApiUrl()} as the base URL
+     * This method is used to create a request that can be sent to the API. Uses {@link #apiUrl} as the base URL
      * and includes {@link #defaultRequestHeaders} in the request.
      *
      * @param method        the HTTP method to use (e.g., "GET", "POST", etc.)
