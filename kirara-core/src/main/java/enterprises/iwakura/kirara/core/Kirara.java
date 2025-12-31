@@ -1,7 +1,7 @@
 package enterprises.iwakura.kirara.core;
 
+import enterprises.iwakura.kirara.core.impl.CompletedApiRequest;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.io.Closeable;
@@ -64,8 +64,9 @@ public abstract class Kirara implements Closeable {
     }
 
     /**
-     * Constructs a {@link ApiRequest} class with the specified method, endpoint, and response class.
-     * This method is used to create a request that can be sent to the API.
+     * A helper method. Constructs a {@link ApiRequest} class with the specified method, endpoint, and response class.
+     * This method is used to create a request that can be sent to the API. Uses {@link #getApiUrl()} as the base URL
+     * and includes {@link #defaultRequestHeaders} in the request.
      *
      * @param method        the HTTP method to use (e.g., "GET", "POST", etc.)
      * @param endpoint      the API endpoint to which the request will be sent
@@ -78,6 +79,19 @@ public abstract class Kirara implements Closeable {
     protected <R extends ApiRequest<T>, T> R createRequest(String method, String endpoint, Class<T> responseClass) {
         return new ApiRequest<>(this, method, getApiUrl(), endpoint, responseClass)
                 .withExplicitHeaders(defaultRequestHeaders);
+    }
+
+    /**
+     * A helper method. Constructs a {@link CompletedApiRequest} with the specified response. This method is used to
+     * create a request that is already completed with a predefined response.
+     *
+     * @param response the response object to be returned
+     * @param <T>      the type of the response expected from the API
+     *
+     * @return a new instance of {@link CompletedApiRequest} with the specified response
+     */
+    protected <T> CompletedApiRequest<T> createCompletedRequest(T response) {
+        return new CompletedApiRequest<>(this, response);
     }
 
     /**

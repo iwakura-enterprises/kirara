@@ -15,9 +15,9 @@ import lombok.Setter;
 public abstract class KiraraResponse<T extends Kirara> implements SupportsKiraraResponse<T> {
 
     /**
-     * The Kirara instance associated with this response.
+     * The Kirara instance associated with this response. Is marked with transient to avoid deserialization.
      */
-    protected T kirara;
+    protected transient T kirara;
 
     /**
      * Constructor

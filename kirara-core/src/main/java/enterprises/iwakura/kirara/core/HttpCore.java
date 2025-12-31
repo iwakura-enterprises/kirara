@@ -102,7 +102,7 @@ public abstract class HttpCore implements Closeable {
     ) {
         Serializer serializer = apiRequest.getSerializerOverride() != null ?
             apiRequest.getSerializerOverride() : kirara.getSerializer();
-        return serializer.deserialize(response, specifiedResponseClass, responseHeaders);
+        return serializer.deserialize(decompressIfNeeded(response, responseHeaders), specifiedResponseClass, responseHeaders);
     }
 
     /**

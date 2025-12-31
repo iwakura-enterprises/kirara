@@ -10,6 +10,8 @@ import enterprises.iwakura.kirara.httpclient.HttpClientHttpCore;
 
 public class HttpBinApi extends Kirara {
 
+    public static final HttpBinResponse CACHED_RESPONSE = new HttpBinResponse();
+
     public HttpBinApi() {
         super(new HttpClientHttpCore(), new GsonSerializer(new Gson(), List.of("application/json", "text/html")));
     }
@@ -22,5 +24,9 @@ public class HttpBinApi extends Kirara {
     public ApiRequest<HttpBinResponse> getAnything() {
         return this.createRequest("GET", "/anything", HttpBinResponse.class)
                 .withExplicitHeaders(this.defaultRequestHeaders);
+    }
+
+    public ApiRequest<HttpBinResponse> getAnything_cached() {
+        return this.createCompletedRequest(CACHED_RESPONSE);
     }
 }

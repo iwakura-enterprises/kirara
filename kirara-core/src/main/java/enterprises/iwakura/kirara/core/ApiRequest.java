@@ -29,12 +29,12 @@ public class ApiRequest<T> {
     /**
      * Kirara instance associated with this request.
      */
-    protected final Kirara kirara;
+    protected Kirara kirara;
 
     /**
      * The HTTP method for this request (e.g., "GET", "POST").
      */
-    protected final String method;
+    protected String method;
 
     /**
      * The API endpoint to which the request will be sent.
@@ -42,13 +42,13 @@ public class ApiRequest<T> {
      * If url is null, the default API URL from Kirara will be used. If that will be null as well,
      * the endpoint will be used as the full URL.
      */
-    protected final String endpoint;
+    protected String endpoint;
 
     /**
      * The class of the expected response type.
      * This is used to deserialize the response body into the appropriate type.
      */
-    protected final Class<T> responseClass;
+    protected Class<T> responseClass;
 
     /**
      * The base URL for the API. If null, the default API URL from Kirara will be used.
