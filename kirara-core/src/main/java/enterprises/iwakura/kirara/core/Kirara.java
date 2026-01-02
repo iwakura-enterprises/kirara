@@ -78,7 +78,7 @@ public abstract class Kirara implements Closeable {
      */
     protected <R extends ApiRequest<T>, T> R createRequest(String method, String endpoint, Class<T> responseClass) {
         return new ApiRequest<>(this, method, getApiUrl(), endpoint, responseClass)
-                .withExplicitHeaders(defaultRequestHeaders);
+                .withExplicitHeaders(getDefaultRequestHeaders());
     }
 
     /**
