@@ -17,13 +17,14 @@ public class ByteSerializer implements Serializer {
 
     @Override
     public <T> T deserialize(
-        byte[] response,
         Class<T> specifiedResponseClass,
-        Map<String, List<String>> responseHeaders
+        int statusCode,
+        Map<String, List<String>> headers,
+        byte[] body
     ) {
         if (specifiedResponseClass != byte[].class) {
             throw new IllegalArgumentException("ByteSerializer can only deserialize to byte[]");
         }
-        return (T) response;
+        return (T) body;
     }
 }

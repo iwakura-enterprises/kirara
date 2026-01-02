@@ -33,7 +33,7 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
      * @return The number of bytes to read at once.
      */
     protected int getNumberOfBytesToReadAtOnce() {
-        return 1024;
+        return 8192; // 8 KB
     }
 
     @Override
@@ -131,8 +131,17 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
      */
     protected <T> T readResponse(Kirara kirara, ApiRequest<?> apiRequest, HttpURLConnection connection, Class<T> responseClass) {
         try {
-            try (InputStream inputStream = connection.getInputStream()) {
+            InputStream inputStream;
+            // Use error stream for error responses
+            if (connection.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
+                inputStream = connection.getErrorStream();
+            } else {
+                inputStream = connection.getInputStream();
+            }
+
+            try {
                 final Map<String, List<String>> responseHeaders = connection.getHeaderFields();
+                final int responseCode = connection.getResponseCode();
                 final byte[] responseBytes;
                 try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
                     byte[] data = new byte[getNumberOfBytesToReadAtOnce()];
@@ -143,7 +152,11 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
                     buffer.flush();
                     responseBytes = buffer.toByteArray();
                 }
-                return convertBytesToResponse(kirara, apiRequest, responseBytes, responseClass, responseHeaders);
+                return convertBytesToResponse(kirara, apiRequest, responseBytes, responseClass, responseCode, responseHeaders);
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to read response", e);

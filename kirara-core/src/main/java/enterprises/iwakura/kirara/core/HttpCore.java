@@ -88,6 +88,7 @@ public abstract class HttpCore implements Closeable {
      * @param apiRequest             The API request associated with the response.
      * @param response               The byte array response to convert.
      * @param specifiedResponseClass The class to deserialize into.
+     * @param responseStatusCode     The HTTP status code of the response.
      * @param responseHeaders        The headers associated with the response, used for content type detection.
      * @param <T>                    The type of the object to deserialize into.
      *
@@ -98,11 +99,13 @@ public abstract class HttpCore implements Closeable {
         ApiRequest<?> apiRequest,
         byte[] response,
         Class<T> specifiedResponseClass,
+        int responseStatusCode,
         Map<String, List<String>> responseHeaders
     ) {
         Serializer serializer = apiRequest.getSerializerOverride() != null ?
             apiRequest.getSerializerOverride() : kirara.getSerializer();
-        return serializer.deserialize(decompressIfNeeded(response, responseHeaders), specifiedResponseClass, responseHeaders);
+        byte[] decompressedResponse = decompressIfNeeded(response, responseHeaders);
+        return serializer.deserialize(specifiedResponseClass, responseStatusCode, responseHeaders, decompressedResponse);
     }
 
     /**

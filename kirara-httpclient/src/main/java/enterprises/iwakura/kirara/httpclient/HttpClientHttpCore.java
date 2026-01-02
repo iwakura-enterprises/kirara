@@ -75,7 +75,8 @@ public class HttpClientHttpCore extends HttpCore {
                 kirara.onRequest(request);
                 final var httpResponse = httpClient.send(httpRequestBuilder.build(), HttpResponse.BodyHandlers.ofByteArray());
                 final var responseHeaders = httpResponse.headers().map();
-                final var response = convertBytesToResponse(kirara, request, httpResponse.body(), responseClass, responseHeaders);
+                final var responseStatusCode = httpResponse.statusCode();
+                final var response = convertBytesToResponse(kirara, request, httpResponse.body(), responseClass, responseStatusCode, responseHeaders);
                 kirara.onResponse(request, response);
 
                 future.complete(handleKiraraSupportedResponse(kirara, response));

@@ -20,13 +20,13 @@ public interface Serializer {
     /**
      * Deserializes a byte array to an object of the specified class.
      *
-     * @param response               The byte array to deserialize.
-     * @param specifiedResponseClass The class to deserialize into.
-     * @param responseHeaders        The headers associated with the response, used for content type detection.
-     * @param <T>                    The type of the object to deserialize into.
+     * @param specifiedResponseClass The class to deserialize to.
+     * @param statusCode             The HTTP status code of the response.
+     * @param headers                The HTTP headers of the response.
+     * @param body                   The byte array to deserialize.
      *
      * @return The deserialized object.
      */
-    <T> T deserialize(byte[] response, Class<T> specifiedResponseClass, Map<String, List<String>> responseHeaders);
+    <T> T deserialize(Class<T> specifiedResponseClass, int statusCode, Map<String, List<String>> headers, byte[] body);
 
 }

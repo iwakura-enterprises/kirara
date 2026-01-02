@@ -47,12 +47,14 @@ public class StringSerializer implements Serializer {
 
     @Override
     public <T> T deserialize(
-        byte[] response,
         Class<T> specifiedResponseClass,
-        Map<String, List<String>> responseHeaders
+        int statusCode,
+        Map<String, List<String>> headers,
+        byte[] body
     ) {
         if (specifiedResponseClass == String.class) {
-            return (T) new String(response, charset);
+            //noinspection unchecked
+            return (T) new String(body, charset);
         }
         throw new IllegalArgumentException("StringSerializer can only deserialize to String");
     }

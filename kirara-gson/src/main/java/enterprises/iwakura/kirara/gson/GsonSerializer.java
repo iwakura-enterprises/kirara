@@ -1,5 +1,7 @@
 package enterprises.iwakura.kirara.gson;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -30,14 +32,19 @@ public class GsonSerializer implements Serializer {
     protected List<String> supportedContentTypes;
 
     /**
-     * Constructs a new GsonSerializer with a default Gson instance and default supported content types.
+     * The default charset used for decoding byte arrays to strings.
+     */
+    protected Charset defaultCharset = StandardCharsets.UTF_8;
+
+    /**
+     * Constructs a new GsonSerializer with a default Gson (created via {@link Gson#Gson()}) instance and {@link #DEFAULT_SUPPORTED_CONTENT_TYPES}
      */
     public GsonSerializer() {
         this(new Gson(), DEFAULT_SUPPORTED_CONTENT_TYPES);
     }
 
     /**
-     * Constructs a new GsonSerializer with the specified Gson instance and default supported content types.
+     * Constructs a new GsonSerializer with the specified Gson instance and {@link #DEFAULT_SUPPORTED_CONTENT_TYPES}
      *
      * @param gson The Gson instance to use for serialization and deserialization.
      */
@@ -72,13 +79,17 @@ public class GsonSerializer implements Serializer {
     }
 
     @Override
-    public <T> T deserialize(byte[] response, Class<T> specifiedResponseClass,
-        Map<String, List<String>> responseHeaders) {
-        if (response == null || response.length == 0) {
+    public <T> T deserialize(
+        Class<T> specifiedResponseClass,
+        int statusCode,
+        Map<String, List<String>> headers,
+        byte[] body
+    ) {
+        if (body == null || body.length == 0) {
             return null; // Return null for empty responses
         }
 
-        List<String> contentType = responseHeaders.get("Content-Type");
+        List<String> contentType = headers.get("Content-Type");
 
         boolean supportsAnyContentType = contentType != null && contentType.stream().anyMatch(ct -> {
             for (String supportedContentType : supportedContentTypes) {
@@ -91,7 +102,7 @@ public class GsonSerializer implements Serializer {
 
         // Treat a response w/o Content-Type as JSON
         if (contentType == null || contentType.isEmpty() || supportsAnyContentType) {
-            String stringResponse = new String(response);
+            String stringResponse = new String(body, defaultCharset);
             try {
                 return gson.fromJson(stringResponse, specifiedResponseClass);
             } catch (Exception exception) {
