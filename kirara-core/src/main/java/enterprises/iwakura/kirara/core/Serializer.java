@@ -24,6 +24,7 @@ public interface Serializer {
      * @param statusCode             The HTTP status code of the response.
      * @param headers                The HTTP headers of the response.
      * @param body                   The byte array to deserialize.
+     * @param <T>                    The type of the object to deserialize to.
      *
      * @return The deserialized object.
      */

@@ -38,11 +38,12 @@ public abstract class HttpCore implements Closeable {
      * Sends an API request and returns a CompletableFuture that will be completed with the response.
      *
      * @param request The API request to send.
+     * @param executor The executor to use for scheduling the request.
      * @param <T>     The type of the response expected from the API.
      *
      * @return A CompletableFuture that will be completed with the response.
      */
-    public abstract <T> CompletableFuture<T> send(ApiRequest<T> request);
+    public abstract <T> CompletableFuture<T> send(ApiRequest<T> request, Executor executor);
 
     /**
      * Closes the HTTP core, releasing any resources it holds.

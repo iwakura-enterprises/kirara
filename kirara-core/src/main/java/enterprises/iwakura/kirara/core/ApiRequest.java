@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -357,11 +358,24 @@ public class ApiRequest<T> {
     }
 
     /**
-     * Invokes {@link HttpCore#send(ApiRequest)} on the current Kirara instance.
+     * Invokes {@link HttpCore#send(ApiRequest, Executor)} on the current Kirara instance and null executor (will use
+     * {@link HttpCore}'s default executor) to send this API request.
      *
-     * @return A CompletableFuture that will complete with the response of type T.
+     * @return A CompletableFuture that will complete with the response of type {@link T}.
      */
     public CompletableFuture<T> send() {
-        return kirara.getHttpCore().send(this);
+        return kirara.getHttpCore().send(this, null);
+    }
+
+    /**
+     * Invokes {@link HttpCore#send(ApiRequest, Executor)} on the current Kirara instance and executor to send this
+     * API request.
+     *
+     * @param executor The executor to use for sending the request.
+     *
+     * @return A CompletableFuture that will complete with the response of type {@link T}.
+     */
+    public CompletableFuture<T> send(Executor executor) {
+        return kirara.getHttpCore().send(this, executor);
     }
 }

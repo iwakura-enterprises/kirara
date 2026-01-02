@@ -14,6 +14,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * Implementation of {@link HttpCore} using Java's built-in {@link HttpURLConnection}.
@@ -37,7 +38,7 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
     }
 
     @Override
-    public <T> CompletableFuture<T> send(ApiRequest<T> request) {
+    public <T> CompletableFuture<T> send(ApiRequest<T> request, Executor executor) {
         final Kirara kirara = request.getKirara();
         final String url = request.computeRequestUrl();
         final String method = request.getMethod();
@@ -46,7 +47,11 @@ public class HttpUrlConnectionHttpCore extends HttpCore {
         final Class<T> responseClass = request.getResponseClass();
         final CompletableFuture<T> future = new CompletableFuture<>();
 
-        getExecutor().execute(() -> {
+        if (executor == null) {
+            executor = getExecutor();
+        }
+
+        executor.execute(() -> {
             try {
                 kirara.onRequest(request);
                 HttpURLConnection connection = createConnection(url, method, headers);

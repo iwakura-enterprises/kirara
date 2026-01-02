@@ -5,6 +5,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import enterprises.iwakura.kirara.core.ApiRequest;
 import enterprises.iwakura.kirara.core.HttpCore;
@@ -53,7 +54,7 @@ public class HttpClientHttpCore extends HttpCore {
     }
 
     @Override
-    public <T> CompletableFuture<T> send(ApiRequest<T> request) {
+    public <T> CompletableFuture<T> send(ApiRequest<T> request, Executor executor) {
         final var kirara = request.getKirara();
         final var url = request.computeRequestUrl();
         final var method = request.getMethod();
@@ -63,7 +64,11 @@ public class HttpClientHttpCore extends HttpCore {
         final var future = new CompletableFuture<T>();
         final var httpRequestBuilder = createHttpRequestBuilder();
 
-        getExecutor().execute(() -> {
+        if (executor == null) {
+            executor = getExecutor();
+        }
+
+        executor.execute(() -> {
             try {
                 httpRequestBuilder.uri(new URI(url));
                 httpRequestBuilder.method(method, getBodyPublisher(kirara, request, body));
