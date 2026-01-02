@@ -145,6 +145,8 @@ public abstract class HttpCore implements Closeable {
                 return decompress(new GZIPInputStream(new ByteArrayInputStream(data)));
             } else if (encoding.contains("deflate")) {
                 return decompress(new InflaterInputStream(new ByteArrayInputStream(data)));
+            } else if (encoding.contains("identity")) {
+                return data;
             } else {
                 System.err.println("[Kirara] Unsupported Content-Encoding: " + encoding);
                 return data;
